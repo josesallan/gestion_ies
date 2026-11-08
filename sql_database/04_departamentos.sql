@@ -1,0 +1,18 @@
+-- Estructura de la tabla departamentos (v2)
+-- Adaptada a la exportación XML de Peñalara / GHC y SIGAD
+
+CREATE TABLE IF NOT EXISTS departamentos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    
+    -- Mapeo con Peñalara / SIGAD
+    codigo_sigad VARCHAR(50) NULL UNIQUE,       -- Extraído de <nombre> (ej: 2246)
+    clave_penalara VARCHAR(50) NULL UNIQUE,     -- Extraído de <claveDeExportacion> (ej: 2246)
+    
+    -- Datos descriptivos
+    nombre_completo VARCHAR(255) NOT NULL,      -- Extraído de <nombreCompleto> (ej: Departamento de Orientación)
+    
+    -- Estado y auditoría
+    es_activo TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

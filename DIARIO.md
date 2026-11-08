@@ -33,3 +33,9 @@
 - Mapeados los campos del XML de Peñalara (`<nombre>`, `<abreviatura>`, `<nombreCompleto>`, `<cursoPerteneciente>`, `<claveDeExportacion>`).
 - Creada la tabla `grupos` en MySQL (`grandeco_gestion_ies`).
 - Creado el archivo de migración `database/03_grupos.sql`.
+
+### [Paso 5] — Creación de Esquemas para Departamentos y Aulas (v2)
+
+- Mapeadas las etiquetas XML de Peñalara para departamentos (`<nombre>`, `<nombreCompleto>`, `<claveDeExportacion>`) y aulas (`<nombre>`, `<abreviatura>`, `<descripcion>`, `<claveDeExportacion>`).
+- Creadas las tablas `departamentos` y `aulas` en MySQL (`grandeco_gestion_ies`).
+- Creados los archivos de migración `database/04_departamentos.sql` y `database/05_aulas.sql`.

@@ -90,3 +90,21 @@
 				<tramo dia="1" indice="7" marco="A">prohibido</tramo>
 			</plantilla>
 		</grupo>
+
+<departamentos>
+		<departamento>
+			<nombre>2246</nombre>
+			<nombreCompleto>Departamento de Orientaci�n</nombreCompleto>
+			<claveDeExportacion>2246</claveDeExportacion>
+		</departamento>
+
+<aulas>
+		<aula>
+			<nombre>1</nombre>
+			<abreviatura>302</abreviatura>
+			<descripcion>302</descripcion>
+			<dedicada>false</dedicada>
+			<claveDeExportacion>1</claveDeExportacion>
+			<plantilla>
+			</plantilla>
+		</aula>

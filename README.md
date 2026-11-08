@@ -8,6 +8,12 @@ Sistema de gestión escolar relacional para IES. Proyecto reescrito desde cero (
 - **Asimilación ETL:** Importación directa desde exportaciones XML de Peñalara (GHC) y SIGAD.
 - **Trazabilidad:** Control de versiones en Git y documentación progresiva de desarrollo.
 
+## 🛠️ Tecnologías
+
+- **Base de datos:** MySQL / MariaDB (phpMyAdmin)
+- **Entorno:** Linux / VS Code
+- **Control de versiones:** Git
+
 ## 📁 Estructura del Proyecto
 
 ```text

@@ -39,3 +39,9 @@
 - Mapeadas las etiquetas XML de Peñalara para departamentos (`<nombre>`, `<nombreCompleto>`, `<claveDeExportacion>`) y aulas (`<nombre>`, `<abreviatura>`, `<descripcion>`, `<claveDeExportacion>`).
 - Creadas las tablas `departamentos` y `aulas` en MySQL (`grandeco_gestion_ies`).
 - Creados los archivos de migración `database/04_departamentos.sql` y `database/05_aulas.sql`.
+
+### [Paso 6] — Creación del Esquema de Tramos Horarios (v2)
+
+- Mapeada la estructura `<marcosDeHorario>` de Peñalara (`<submarco>`, `<dia>`, `<indice>`, `<horaEntrada>`, `<horaSalida>`, `<Tipo>`, `<clavX>`).
+- Creada la tabla `tramos_horarios` en MySQL (`grandeco_gestion_ies`).
+- Creado el archivo de migración `database/06_tramos_horarios.sql`.

@@ -108,3 +108,15 @@
 			<plantilla>
 			</plantilla>
 		</aula>
+
+<marcosDeHorario>
+		<marcoHorario id="A" nombre="Marco 41" claveX="41">
+			<tramo>
+				<submarco>A</submarco>
+				<dia>0</dia>
+				<indice>0</indice>
+				<horaEntrada>08:30:00</horaEntrada>
+				<horaSalida>09:20:00</horaSalida>
+				<Tipo>lectivo</Tipo>
+				<clavX>1</clavX>
+			</tramo>

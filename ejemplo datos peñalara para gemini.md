@@ -120,3 +120,21 @@
 				<Tipo>lectivo</Tipo>
 				<clavX>1</clavX>
 			</tramo>
+
+<conjuntoDeAulas>
+		<general nombre="general" sinDeclarar="0">
+			<aula>1</aula>
+			<aula>10</aula>
+			<aula>11</aula>
+			<aula>12</aula>
+			<aula>13</aula>
+			<aula>14</aula>
+			<aula>15</aula>
+			<aula>24</aula>
+			<aula>25</aula>
+		</general>
+		<otroConjunto nombre="ed.f�sica">
+			<aula>40</aula>
+			<aula>57</aula>
+			<aula>69</aula>
+		</otroConjunto>

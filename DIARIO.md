@@ -45,3 +45,15 @@
 - Mapeada la estructura `<marcosDeHorario>` de Peñalara (`<submarco>`, `<dia>`, `<indice>`, `<horaEntrada>`, `<horaSalida>`, `<Tipo>`, `<clavX>`).
 - Creada la tabla `tramos_horarios` en MySQL (`grandeco_gestion_ies`).
 - Creado el archivo de migración `database/06_tramos_horarios.sql`.
+
+### [Paso 7] — Esquema de Conjuntos y Agrupaciones de Aulas (v2)
+
+- Mapeada la estructura `<conjuntoDeAulas>` de Peñalara (`<general>` y `<otroConjunto nombre="...">`).
+- Diseñadas las tablas `conjuntos_aulas` y la tabla pivote `aula_conjunto` (relación M:N) con claves foráneas.
+- Creado el archivo de migración `database/07_conjuntos_aulas.sql`.
+
+### [Paso 8] — Esquemas de Tareas y Cursos (v2)
+
+- Mapeadas las tareas complementarias (`<tareas>`) y los cursos con asignación de materias y número de sesiones (`<cursos>`).
+- Creadas las tablas `tareas`, `cursos` y la tabla pivote `curso_materia`.
+- Creados los archivos de migración `database/08_tareas.sql` y `database/09_cursos.sql`.

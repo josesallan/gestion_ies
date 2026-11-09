@@ -138,3 +138,38 @@
 			<aula>57</aula>
 			<aula>69</aula>
 		</otroConjunto>
+
+<tareas>
+		<tarea>
+			<nombre>AACECOM</nombre>
+			<nombreCompleto>RM55 - Apoyo a actividades complementarias, extraescolares y de coordinaci�n con AMPA y familias</nombreCompleto>
+			<claveDeExportacion>6189</claveDeExportacion>
+			<plantilla>
+			</plantilla>
+
+<cursos>
+		<curso>
+			<nombre>1875</nombre>
+			<nombreCompleto>1-ESO-FGC</nombreCompleto>
+			<claveDeExportacion>1875</claveDeExportacion>
+			<materiasDelCurso>
+				<materia numSesiones="3.00">12911</materia>
+				<materia numSesiones="4.00">12912</materia>
+				<materia numSesiones="4.00">12913</materia>
+				<materia numSesiones="2.00">12914</materia>
+				<materia numSesiones="3.00">12915</materia>
+				<materia numSesiones="3.00">12916</materia>
+				<materia numSesiones="3.00">12917</materia>
+				<materia numSesiones="3.00">12918</materia>
+				<materia numSesiones="3.00">12923</materia>
+				<materia numSesiones="4.00">12939</materia>
+				<materia numSesiones="4.00">12940</materia>
+				<materia numSesiones="2.00">12947</materia>
+				<materia numSesiones="2.00">12951</materia>
+				<materia numSesiones="1.00">12952</materia>
+				<materia numSesiones="1.00">12954</materia>
+				<materia numSesiones="1.00">12956</materia>
+				<materia numSesiones="1.00">12959</materia>
+				<materia numSesiones="1.00">12960</materia>
+			</materiasDelCurso>
+		</curso>

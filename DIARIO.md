@@ -57,3 +57,18 @@
 - Mapeadas las tareas complementarias (`<tareas>`) y los cursos con asignación de materias y número de sesiones (`<cursos>`).
 - Creadas las tablas `tareas`, `cursos` y la tabla pivote `curso_materia`.
 - Creados los archivos de migración `database/08_tareas.sql` y `database/09_cursos.sql`.
+
+### [Paso 9] — Creación del Esquema de Horarios (v2)
+
+- Analizados los bloques del XML de Peñalara: `<sesionesLectivas>`, `<reuniones>`, `<guardias>` y el nodo maestro temporal `<horario>`.
+- Diseñada la tabla principal `horarios` como contenedor universal de sesiones lectivas y horas complementarias (aprovechando campos nulos `NULL`).
+- Diseñada la tabla pivote `horario_grupo` (relación M:N) con clave primaria compuesta (`horario_id`, `grupo_id`) para gestionar desdobles y sesiones con múltiples grupos de forma robusta.
+- Resolución de conflictos de restricciones de claves foráneas en MySQL e implementación de timestamps de auditoría (`created_at`, `updated_at`).
+- Creado el archivo de migración `database/10_horarios.sql`. Esquema relacional de la base de datos 100% completado (10 tablas en total).
+
+### [Paso 10] — Ejecución Exitosa del ETL Fase 1 (PHP CLI)
+
+- Configurado el entorno local en Linux con `php-cli` y `php-xml`.
+- Desarrollada la arquitectura del script `scripts/import_penalara_xml.php`.
+- Ejecutada con éxito la Fase 1: Extracción en memoria mediante diccionarios y arrays de equivalencia.
+- **Resultado validado:** 86 profesores, 214 materias, 35 grupos y 49 aulas parseados correctamente desde el XML real (`Horario.para.programa.geston.xml`).

@@ -66,9 +66,27 @@
 - Resolución de conflictos de restricciones de claves foráneas en MySQL e implementación de timestamps de auditoría (`created_at`, `updated_at`).
 - Creado el archivo de migración `database/10_horarios.sql`. Esquema relacional de la base de datos 100% completado (10 tablas en total).
 
-### [Paso 10] — Ejecución Exitosa del ETL Fase 1 (PHP CLI)
+### [Paso 10] — Consolidación de Niveles 0, 1 y 2 en el ETL y Refactorización Atómica
 
-- Configurado el entorno local en Linux con `php-cli` y `php-xml`.
-- Desarrollada la arquitectura del script `scripts/import_penalara_xml.php`.
-- Ejecutada con éxito la Fase 1: Extracción en memoria mediante diccionarios y arrays de equivalencia.
-- **Resultado validado:** 86 profesores, 214 materias, 35 grupos y 49 aulas parseados correctamente desde el XML real (`Horario.para.programa.geston.xml`).
+- **Corrección de Colisiones en Importación:** Identificado y resuelto el fallo de sobreescritura `ON DUPLICATE KEY UPDATE` en profesores, garantizando la inserción correcta de los 88 profesores.
+- **Refactorización Atómica de `profesores` (3FN):** Rediseñada la tabla para separar de forma limpia `nombre`, `apellidos`, `nombre_completo` e incorporar la clave foránea `departamento_id_externo`.
+- **Parser Inteligente de Nombres (PHP):** Implementado el helper `parsearNombreProfesor()` para desestructurar y limpiar automáticamente "APELLIDOS, NOMBRE" con manejo correcto de codificación UTF-8.
+- **Auditoría e Integridad Confirmada:** 
+  - **Departamentos:** 17 registros importados y vinculados.
+  - **Conjuntos de Aulas:** 9 conjuntos creados.
+  - **Profesores:** 88 docentes parseados atómicamente y asociados a sus departamentos (1:N).
+  - **Materias:** 214 materias asignadas a sus departamentos (1:N).
+  - **Aulas:** 49 aulas importadas y mapeadas en la tabla pivote `aula_conjunto` (N:M).
+- **Documentación de Arquitectura:** Creado `database/RELACIONES_Y_CARDINALIDADES.md` con las consultas SQL de auditoría y jerarquía por niveles.
+
+---
+
+## 🔮 Próximos Pasos (Para la Siguiente Sesión)
+
+1. **Importación de Nivel 2 (Cursos y Grupos):**
+   - Revisar la estructura de la tabla `cursos` y `grupos`.
+   - Implementar el procesamiento de `<cursos>` y `<grupos>` en el script `scripts/import_penalara_xml.php`.
+   - Poblar la tabla pivote `curso_materia` (asignación de materias y número de sesiones por curso).
+2. **Importación de Nivel 3 (Sesiones Lectivas y Horarios):**
+   - Parsear el bloque de `<sesionesLectivas>`, `<reuniones>` y `<guardias>`.
+   - Mapear las asignaciones horarias universales a la tabla `horarios` y su pivote `horario_grupo`.

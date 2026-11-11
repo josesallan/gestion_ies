@@ -1,0 +1,8 @@
+# Archivo de configuración con credenciales reales (NUNCA SUBIR A GIT)
+config/database.php
+
+# Archivos temporales o de entorno local
+public/test.php
+.DS_Store
+Thumbs.db
+*.log

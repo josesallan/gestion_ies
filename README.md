@@ -4,9 +4,10 @@ Sistema de gestión escolar relacional para IES. Proyecto reescrito desde cero (
 
 ## 🚀 Características Principales (v2)
 
-- **Base de datos normalizada:** MySQL con codificación `utf8mb4_unicode_ci` para soporte completo de caracteres y tildes. Arquitectura de 10 tablas relacionales totalmente desplegada.
-- **Asimilación ETL:** Importación directa desde exportaciones XML de Peñalara (GHC) y SIGAD mediante scripts nativos en PHP CLI. Fase 1 de extracción y diccionarios validada con éxito.
-- **Trazabilidad:** Control de versiones en Git y documentación progresiva de desarrollo en el diario de a bordo.
+- **Base de datos normalizada (3FN):** MySQL / MariaDB con codificación `utf8mb4_unicode_ci`. Arquitectura atómica de 10 tablas relacionales totalmente desplegadas y refactorizadas.
+- **Asimilación ETL Avanzada:** Importación y parseo atómico desde exportaciones XML de Peñalara (GHC) mediante PHP CLI y PDO. Integración completa de Niveles 0, 1 y 2 (Departamentos, Aulas, Conjuntos, Profesores y Materias).
+- **Parser Atómico de Nombres:** Normalización automatizada de cadenas complejas a campos separados (`nombre`, `apellidos`, `nombre_completo`) con soporte multi-caracter.
+- **Trazabilidad y Auditoría:** Control de versiones en Git, documentación de relaciones/cardinalidades y registro diario de desarrollo.
 
 ## 🛠️ Tecnologías
 
@@ -20,12 +21,12 @@ Sistema de gestión escolar relacional para IES. Proyecto reescrito desde cero (
 ```text
 gestion_ies/
 ├── Horario.para.programa.geston.xml  # Exportación XML de Peñalara GHC
-├── database/                         # Esquemas SQL y migraciones (10 tablas desplegadas)
-│   ├── 01_profesores.sql
+├── database/                         # Esquemas SQL, migraciones y arquitectura relacional
+│   ├── 01_profesores.sql             # (Estructura atómica refactorizada)
 │   ├── ...
-│   └── 10_horarios.sql
+│   ├── 10_horarios.sql
+│   └── RELACIONES_Y_CARDINALIDADES.md # Mapa de cardinalidades y consultas SQL de auditoría
 ├── scripts/                          # Scripts de importación y procesamiento (ETL)
-│   └── import_penalara_xml.php
+│   └── import_penalara_xml.php      # Engine ETL por niveles (beginTransaction/commit)
 ├── DIARIO.md                         # Registro diario de avances del proyecto
 └── README.md                         # Documentación general del repositorio
-```

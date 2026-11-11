@@ -1,8 +1,3 @@
----
-
-### 3. `database/RELACIONES_Y_CARDINALIDADES.md`
-
-```markdown
 # Modelo Relacional y Cardinalidades (ETL Peñalara XML → MariaDB v2)
 
 Este documento registra la arquitectura de dependencias relacionales, las cardinalidades mapeadas y el flujo de importación en niveles utilizado en el proyecto **Gestión IES v2** para la migración desde el XML de Peñalara (GHC).
@@ -43,59 +38,3 @@ NIVEL 2 (Tablas Pivote N:M y Estructura Académica)
 
 NIVEL 3 (Horarios y Sesiones Lectivas)
  └── 10. Sesiones / Horarios (`horarios`)
----
-
-## 3. Consultas SQL de Auditoría e Integridad
-#3.1. Agrupación de Profesores por Departamento
-SQL
-
-SELECT 
-    d.nombre_completo AS departamento,
-    COUNT(p.id) AS total_profesores,
-    GROUP_CONCAT(p.nombre_completo ORDER BY p.nombre_completo SEPARATOR ', ') AS profesores
-FROM departamentos d
-LEFT JOIN profesores p ON d.clave_penalara = p.departamento_id_externo
-GROUP BY d.id, d.nombre_completo
-ORDER BY d.nombre_completo;
-
-#3.2. Agrupación de Materias por Departamento
-SQL
-
-SELECT 
-    d.nombre_completo AS departamento,
-    COUNT(m.id) AS total_materias,
-    GROUP_CONCAT(m.abreviatura ORDER BY m.abreviatura SEPARATOR ', ') AS materias
-FROM departamentos d
-LEFT JOIN materias m ON d.clave_penalara = m.departamento_id_externo
-GROUP BY d.id, d.nombre_completo
-ORDER BY total_materias DESC, d.nombre_completo ASC;
-
-#3.3. Mapeo de Aulas en Conjuntos (Tabla Pivote aula_conjunto)
-SQL
-
-SELECT 
-    ca.nombre AS conjunto,
-    ca.es_general,
-    COUNT(ac.aula_id) AS total_aulas,
-    GROUP_CONCAT(a.abreviatura ORDER BY a.abreviatura SEPARATOR ', ') AS aulas_incluidas
-FROM conjuntos_aulas ca
-JOIN aula_conjunto ac ON ca.id = ac.conjunto_id
-JOIN aulas a ON a.id = ac.aula_id
-GROUP BY ca.id, ca.nombre, ca.es_general
-ORDER BY ca.es_general DESC, ca.nombre ASC;
-
-#3.4. Detección de Registros Huérfanos
-SQL
-
--- Profesores o Materias sin departamento válido
-SELECT 'Profesor sin depto' AS tipo, id, nombre_completo, departamento_id_externo 
-FROM profesores 
-WHERE departamento_id_externo IS NULL 
-   OR departamento_id_externo NOT IN (SELECT clave_penalara FROM departamentos)
-
-UNION ALL
-
-SELECT 'Materia sin depto' AS tipo, id, nombre_completo, departamento_id_externo 
-FROM materias 
-WHERE departamento_id_externo IS NULL 
-   OR departamento_id_externo NOT IN (SELECT clave_penalara FROM departamentos);

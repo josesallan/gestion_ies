@@ -16,25 +16,62 @@ Este documento registra la arquitectura de dependencias relacionales, las cardin
 
 ---
 
-## 2. Jerarquía de Importación ETL por Niveles
+## 2. Diagrama Entidad-Relación (Niveles 0, 1 y 2 Implementados)
 
-Para garantizar la integridad referencial y evitar dependencias huérfanas, el proceso ETL (`scripts/import_penalara_xml.php`) sigue una ordenación estricta de ejecución en una única transacción SQL:
+```mermaid
+erDiagram
+    DEPARTAMENTOS {
+        int id PK
+        varchar codigo_sigad
+        varchar clave_penalara UK "Clave enlace Peñalara"
+        varchar nombre_completo
+    }
 
-```text
-NIVEL 0 (Entidades Independientes Totales)
- ├── 1. Departamentos (`departamentos`)
- └── 2. Conjuntos de Aulas (`conjuntos_aulas`)
+    PROFESORES {
+        int id PK
+        varchar clave_penalara UK
+        varchar dni
+        varchar abreviatura
+        varchar nombre "Atómico (1FN)"
+        varchar apellidos "Atómico (1FN)"
+        varchar nombre_completo
+        varchar email
+        varchar departamento_id_externo FK
+        boolean es_activo
+    }
 
-NIVEL 1 (Entidades con Dependencia Única de Nivel 0 y Parseo Atómico)
- ├── 3. Profesores (`profesores`)  ──> Depende de Departamentos (Parseo Atómico APELLIDOS, NOMBRE)
- ├── 4. Materias (`materias`)      ──> Depende de Departamentos
- └── 5. Aulas (`aulas`)           ──> Entidad base
+    MATERIAS {
+        int id PK
+        varchar codigo_sigad
+        varchar clave_penalara UK
+        varchar abreviatura
+        varchar nombre_completo
+        varchar departamento_id_externo FK
+    }
 
-NIVEL 2 (Tablas Pivote N:M y Estructura Académica)
- ├── 6. Aula_Conjunto (`aula_conjunto`) ──> Relaciona Aulas con Conjuntos
- ├── 7. Cursos (`cursos`)
- ├── 8. Grupos (`grupos`)
- └── 9. Curso_Materia (`curso_materia`)
+    AULAS {
+        int id PK
+        varchar codigo_sigad
+        varchar clave_penalara UK
+        varchar abreviatura
+        varchar descripcion
+    }
 
-NIVEL 3 (Horarios y Sesiones Lectivas)
- └── 10. Sesiones / Horarios (`horarios`)
+    CONJUNTOS_AULAS {
+        int id PK
+        varchar nombre UK
+        boolean es_general
+    }
+
+    AULA_CONJUNTO {
+        int aula_id PK, FK
+        int conjunto_id PK, FK
+    }
+
+    %% Relaciones 1:N (Nivel 0 -> Nivel 1)
+    DEPARTAMENTOS ||--o{ PROFESORES : "adscribe (1:N)"
+    DEPARTAMENTOS ||--o{ MATERIAS : "coordina (1:N)"
+
+    %% Relación N:M (Nivel 1/0 -> Nivel 2 Pivote)
+    AULAS ||--o{ AULA_CONJUNTO : "pertenece a"
+    CONJUNTOS_AULAS ||--o{ AULA_CONJUNTO : "agrupa"

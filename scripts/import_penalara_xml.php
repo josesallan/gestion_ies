@@ -42,7 +42,7 @@ function parsearNombreProfesor(string $cadenaCompleta): array {
 
 $ruta_xml = __DIR__ . '/../Horario.para.programa.gestion.xml';
 
-echo "🚀 INICIANDO ETL: MIGRACIÓN DE XML A MARIADB (v2.1)\n";
+echo "🚀 INICIANDO ETL: MIGRACIÓN DE XML A MARIADB (v2.2)\n";
 echo "------------------------------------------------\n";
 
 if (!file_exists($ruta_xml)) {
@@ -88,12 +88,12 @@ try {
     $countDept = 0;
     if (isset($xml->departamentos->departamento)) {
         foreach ($xml->departamentos->departamento as $nodo) {
-            $nombreCompleto = (string)$nodo->nombreCompleto;
-            $codigoSigad = (string)$nodo->nombre;
+            $nombreCompleto = mb_convert_encoding(trim((string)$nodo->nombreCompleto), 'UTF-8', 'UTF-8, ISO-8859-1');
+            $codigoSigad = trim((string)$nodo->nombre);
             
             $stmtDept->execute([
                 ':codigo_sigad'    => $codigoSigad,
-                ':clave_penalara'  => (string)$nodo->claveDeExportacion,
+                ':clave_penalara'  => trim((string)$nodo->claveDeExportacion),
                 ':nombre_completo' => $nombreCompleto ?: $codigoSigad
             ]);
             $countDept++;
@@ -111,7 +111,7 @@ try {
     $countConjuntos = 0;
     if (isset($xml->conjuntoDeAulas)) {
         foreach ($xml->conjuntoDeAulas->children() as $nodoConjunto) {
-            $nombreConjunto = (string)$nodoConjunto['nombre'];
+            $nombreConjunto = mb_convert_encoding(trim((string)$nodoConjunto['nombre']), 'UTF-8', 'UTF-8, ISO-8859-1');
             if (empty($nombreConjunto)) {
                 $nombreConjunto = $nodoConjunto->getName();
             }
@@ -216,15 +216,15 @@ try {
     $countMat = 0;
     if (isset($xml->materias->materia)) {
         foreach ($xml->materias->materia as $nodo) {
-            $codigoSigad = (string)$nodo->nombre;
-            $abrev = (string)$nodo->abreviatura;
-            $nombreCompleto = (string)$nodo->nombreCompleto;
+            $codigoSigad = trim((string)$nodo->nombre);
+            $abrev = trim((string)$nodo->abreviatura);
+            $nombreCompleto = mb_convert_encoding(trim((string)$nodo->nombreCompleto), 'UTF-8', 'UTF-8, ISO-8859-1');
             
             $stmtMat->execute([
                 ':codigo_sigad'            => $codigoSigad,
-                ':clave_penalara'          => (string)$nodo->claveDeExportacion,
+                ':clave_penalara'          => trim((string)$nodo->claveDeExportacion),
                 ':abreviatura'             => $abrev ?: $codigoSigad,
-                ':departamento_id_externo' => (string)$nodo->departamento,
+                ':departamento_id_externo' => trim((string)$nodo->departamento),
                 ':nombre_completo'         => $nombreCompleto ?: $abrev ?: $codigoSigad
             ]);
             $countMat++;
@@ -254,15 +254,15 @@ try {
     $countAula = 0;
     if (isset($xml->aulas->aula)) {
         foreach ($xml->aulas->aula as $nodo) {
-            $codigoSigad = (string)$nodo->nombre;
-            $abrev = (string)$nodo->abreviatura;
-            $desc = (string)$nodo->descripcion;
+            $codigoSigad = trim((string)$nodo->nombre);
+            $abrev = trim((string)$nodo->abreviatura);
+            $desc = mb_convert_encoding(trim((string)$nodo->descripcion), 'UTF-8', 'UTF-8, ISO-8859-1');
             
             $stmtAula->execute([
                 ':codigo_sigad'   => $codigoSigad,
-                ':clave_penalara' => (string)$nodo->claveDeExportacion,
+                ':clave_penalara' => trim((string)$nodo->claveDeExportacion),
                 ':abreviatura'    => $abrev ?: $codigoSigad,
-                ':descripcion'    => $desc ?: NULL
+                ':descripcion'    => $desc ?: null
             ]);
             $countAula++;
         }
@@ -270,7 +270,7 @@ try {
     echo "   ➔ {$countAula} aulas procesadas.\n";
 
     // =========================================================================
-    // NIVEL 2: RELACIONES PIVOTE (N:M)
+    // NIVEL 2: RELACIONES PIVOTE (N:M) Y ESTRUCTURA ACADÉMICA
     // =========================================================================
 
     // --- 6. RELACIÓN PIVOTE: AULA_CONJUNTO ---
@@ -296,7 +296,7 @@ try {
     $countRelaciones = 0;
     if (isset($xml->conjuntoDeAulas)) {
         foreach ($xml->conjuntoDeAulas->children() as $nodoConjunto) {
-            $nombreConjunto = (string)$nodoConjunto['nombre'];
+            $nombreConjunto = mb_convert_encoding(trim((string)$nodoConjunto['nombre']), 'UTF-8', 'UTF-8, ISO-8859-1');
             if (empty($nombreConjunto)) {
                 $nombreConjunto = $nodoConjunto->getName();
             }
@@ -306,7 +306,7 @@ try {
 
             if ($conjuntoId && isset($nodoConjunto->aula)) {
                 foreach ($nodoConjunto->aula as $codigoAulaXml) {
-                    $codigoAula = (string)$codigoAulaXml;
+                    $codigoAula = trim((string)$codigoAulaXml);
                     
                     $stmtGetAulaId->execute([
                         ':cod1' => $codigoAula,
@@ -326,6 +326,133 @@ try {
         }
     }
     echo "   ➔ {$countRelaciones} vínculos en aula_conjunto creados.\n";
+
+    // --- 7. CURSOS Y RELACIÓN PIVOTE: CURSO_MATERIA ---
+    echo "🎓 [Nivel 2] Procesando Cursos y Carga Lectiva (curso_materia)...\n";
+    
+    $stmtCurso = $pdo->prepare("
+        INSERT INTO cursos (
+            codigo_sigad, 
+            clave_penalara, 
+            nombre_completo
+        ) VALUES (
+            :codigo_sigad, 
+            :clave_penalara, 
+            :nombre_completo
+        )
+        ON DUPLICATE KEY UPDATE 
+            codigo_sigad = VALUES(codigo_sigad),
+            nombre_completo = VALUES(nombre_completo)
+    ");
+
+    $stmtGetCursoId = $pdo->prepare("
+        SELECT id FROM cursos WHERE clave_penalara = :clave LIMIT 1
+    ");
+
+    $stmtGetMateriaId = $pdo->prepare("
+        SELECT id FROM materias WHERE clave_penalara = :clave OR codigo_sigad = :cod LIMIT 1
+    ");
+
+    $stmtCursoMateria = $pdo->prepare("
+        INSERT INTO curso_materia (curso_id, materia_id, num_sesiones)
+        VALUES (:curso_id, :materia_id, :num_sesiones)
+        ON DUPLICATE KEY UPDATE num_sesiones = VALUES(num_sesiones)
+    ");
+
+    $countCursos = 0;
+    $countCursoMateria = 0;
+
+    if (isset($xml->cursos->curso)) {
+        foreach ($xml->cursos->curso as $nodoCurso) {
+            $codigoSigad = trim((string)$nodoCurso->nombre);
+            $clavePenalara = trim((string)$nodoCurso->claveDeExportacion);
+            $rawNombre = trim((string)$nodoCurso->nombreCompleto);
+            $nombreLimpio = mb_convert_encoding($rawNombre, 'UTF-8', 'UTF-8, ISO-8859-1');
+
+            if (empty($clavePenalara)) continue;
+
+            $stmtCurso->execute([
+                ':codigo_sigad'    => $codigoSigad ?: null,
+                ':clave_penalara'  => $clavePenalara,
+                ':nombre_completo' => $nombreLimpio ?: $codigoSigad
+            ]);
+            $countCursos++;
+
+            $stmtGetCursoId->execute([':clave' => $clavePenalara]);
+            $cursoId = $stmtGetCursoId->fetchColumn();
+
+            if ($cursoId && isset($nodoCurso->materiasDelCurso->materia)) {
+                foreach ($nodoCurso->materiasDelCurso->materia as $nodoMatCurso) {
+                    $claveMateriaXml = trim((string)$nodoMatCurso);
+                    $numSesiones = (float)$nodoMatCurso['numSesiones'];
+
+                    $stmtGetMateriaId->execute([
+                        ':clave' => $claveMateriaXml,
+                        ':cod'   => $claveMateriaXml
+                    ]);
+                    $materiaId = $stmtGetMateriaId->fetchColumn();
+
+                    if ($materiaId) {
+                        $stmtCursoMateria->execute([
+                            ':curso_id'     => $cursoId,
+                            ':materia_id'   => $materiaId,
+                            ':num_sesiones' => $numSesiones
+                        ]);
+                        $countCursoMateria++;
+                    }
+                }
+            }
+        }
+    }
+    echo "   ➔ {$countCursos} cursos procesados y {$countCursoMateria} asignaciones en curso_materia.\n";
+
+    // --- 8. GRUPOS ---
+    echo "👥 [Nivel 2] Procesando Grupos...\n";
+    
+    $stmtGrupo = $pdo->prepare("
+        INSERT INTO grupos (
+            codigo_sigad, 
+            clave_penalara, 
+            abreviatura, 
+            curso_id_externo, 
+            nombre_completo
+        ) VALUES (
+            :codigo_sigad, 
+            :clave_penalara, 
+            :abreviatura, 
+            :curso_id_externo, 
+            :nombre_completo
+        )
+        ON DUPLICATE KEY UPDATE 
+            codigo_sigad = VALUES(codigo_sigad),
+            abreviatura = VALUES(abreviatura),
+            curso_id_externo = VALUES(curso_id_externo),
+            nombre_completo = VALUES(nombre_completo)
+    ");
+
+    $countGrupos = 0;
+    if (isset($xml->grupos->grupo)) {
+        foreach ($xml->grupos->grupo as $nodoGrupo) {
+            $codigoSigad = trim((string)$nodoGrupo->nombre);
+            $clavePenalara = trim((string)$nodoGrupo->claveDeExportacion);
+            $abrev = trim((string)$nodoGrupo->abreviatura);
+            $cursoExterno = trim((string)$nodoGrupo->cursoPerteneciente);
+            $rawNombre = trim((string)$nodoGrupo->nombreCompleto);
+            $nombreLimpio = mb_convert_encoding($rawNombre, 'UTF-8', 'UTF-8, ISO-8859-1');
+
+            if (empty($clavePenalara)) continue;
+
+            $stmtGrupo->execute([
+                ':codigo_sigad'     => $codigoSigad ?: null,
+                ':clave_penalara'   => $clavePenalara,
+                ':abreviatura'      => $abrev ?: $codigoSigad,
+                ':curso_id_externo' => $cursoExterno ?: null,
+                ':nombre_completo'  => $nombreLimpio ?: $abrev
+            ]);
+            $countGrupos++;
+        }
+    }
+    echo "   ➔ {$countGrupos} grupos procesados.\n";
 
     // Confirmar transacción
     $pdo->commit();

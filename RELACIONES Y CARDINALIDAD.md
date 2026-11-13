@@ -104,12 +104,15 @@ erDiagram
     CURSOS ||--o{ GRUPOS : "engloba (1:N)"
     CURSOS ||--o{ CURSO_MATERIA : "define carga"
     MATERIAS ||--o{ CURSO_MATERIA : "impartida en"
+```
+
+---
 
 ## 3. Jerarquía de Importación ETL por Niveles
 
-Para garantizar la integridad referencial y evitar dependencias huérfanas, el proceso ETL (scripts/import_penalara_xml.php) sigue una ordenación estricta de ejecución en una única transacción SQL:
-Plaintext
+Para garantizar la integridad referencial y evitar dependencias huérfanas, el proceso ETL (`scripts/import_penalara_xml.php`) sigue una ordenación estricta de ejecución en una única transacción SQL:
 
+```text
 NIVEL 0 (Entidades Independientes Totales)
  ├── 1. Departamentos (`departamentos`)
  └── 2. Conjuntos de Aulas (`conjuntos_aulas`)
@@ -127,11 +130,15 @@ NIVEL 2 (Tablas Pivote N:M y Estructura Académica)
 
 NIVEL 3 (Horarios y Sesiones Lectivas)
  └── 10. Tramos Horarios y Sesiones (`tramos_horarios`, `tareas`, `horarios`, `horario_grupo`)
+```
+
+---
 
 ## 4. Consultas SQL de Auditoría e Integridad
-### 4.1. Agrupación de Profesores por Departamento
-SQL
 
+### 4.1. Agrupación de Profesores por Departamento
+
+```sql
 SELECT 
     d.nombre_completo AS departamento,
     COUNT(p.id) AS total_profesores,
@@ -140,10 +147,11 @@ FROM departamentos d
 LEFT JOIN profesores p ON d.clave_penalara = p.departamento_id_externo
 GROUP BY d.id, d.nombre_completo
 ORDER BY d.nombre_completo;
+```
 
 ### 4.2. Agrupación de Materias por Departamento
-SQL
 
+```sql
 SELECT 
     d.nombre_completo AS departamento,
     COUNT(m.id) AS total_materias,
@@ -152,10 +160,11 @@ FROM departamentos d
 LEFT JOIN materias m ON d.clave_penalara = m.departamento_id_externo
 GROUP BY d.id, d.nombre_completo
 ORDER BY total_materias DESC, d.nombre_completo ASC;
+```
 
-### 4.3. Mapeo de Aulas en Conjuntos (Tabla Pivote aula_conjunto)
-SQL
+### 4.3. Mapeo de Aulas en Conjuntos (Tabla Pivote `aula_conjunto`)
 
+```sql
 SELECT 
     ca.nombre AS conjunto,
     ca.es_general,
@@ -166,10 +175,11 @@ JOIN aula_conjunto ac ON ca.id = ac.conjunto_id
 JOIN aulas a ON a.id = ac.aula_id
 GROUP BY ca.id, ca.nombre, ca.es_general
 ORDER BY ca.es_general DESC, ca.nombre ASC;
+```
 
-### 4.4. Grupos por Curso (Relación 1:N)
-SQL
+### 4.4. Grupos por Curso (Relación `1:N`)
 
+```sql
 SELECT 
     c.nombre_completo AS curso,
     COUNT(g.id) AS total_grupos,
@@ -178,10 +188,11 @@ FROM cursos c
 LEFT JOIN grupos g ON c.clave_penalara = g.curso_id_externo
 GROUP BY c.id, c.nombre_completo
 ORDER BY c.nombre_completo;
+```
 
-### 4.5. Carga Lectiva y Materias por Curso (Tabla Pivote curso_materia)
-SQL
+### 4.5. Carga Lectiva y Materias por Curso (Tabla Pivote `curso_materia`)
 
+```sql
 SELECT 
     c.nombre_completo AS curso,
     COUNT(cm.materia_id) AS total_materias,
@@ -192,10 +203,11 @@ JOIN curso_materia cm ON c.id = cm.curso_id
 JOIN materias m ON m.id = cm.materia_id
 GROUP BY c.id, c.nombre_completo
 ORDER BY c.nombre_completo;
+```
 
 ### 4.6. Detección de Registros Huérfanos (Niveles 1 y 2)
-SQL
 
+```sql
 SELECT 'Profesor sin depto' AS tipo, id, nombre_completo, departamento_id_externo AS ref_externa
 FROM profesores 
 WHERE departamento_id_externo IS NULL 
@@ -214,3 +226,4 @@ SELECT 'Grupo sin curso' AS tipo, id, nombre_completo, curso_id_externo AS ref_e
 FROM grupos
 WHERE curso_id_externo IS NULL 
    OR curso_id_externo NOT IN (SELECT clave_penalara FROM cursos);
+```

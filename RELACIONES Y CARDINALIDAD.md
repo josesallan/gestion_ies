@@ -1,10 +1,3 @@
----
-
-### 3. `database/RELACIONES_Y_CARDINALIDADES.md`
-
-*(Asegúrate de guardar este contenido dentro de `database/RELACIONES_Y_CARDINALIDADES.md` y eliminar el archivo suelto `RELACIONES Y CARDINALIDAD.md` de la raíz si aún existe).*
-
-```markdown
 # Modelo Relacional y Cardinalidades (ETL Peñalara XML → MariaDB v2)
 
 Este documento registra la arquitectura de dependencias relacionales, las cardinalidades mapeadas y el flujo de importación en niveles utilizado en el proyecto **Gestión IES v2** para la migración desde el XML de Peñalara (GHC).
@@ -112,7 +105,7 @@ erDiagram
     CURSOS ||--o{ CURSO_MATERIA : "define carga"
     MATERIAS ||--o{ CURSO_MATERIA : "impartida en"
 
-    3. Jerarquía de Importación ETL por Niveles
+## 3. Jerarquía de Importación ETL por Niveles
 
 Para garantizar la integridad referencial y evitar dependencias huérfanas, el proceso ETL (scripts/import_penalara_xml.php) sigue una ordenación estricta de ejecución en una única transacción SQL:
 Plaintext
@@ -135,8 +128,8 @@ NIVEL 2 (Tablas Pivote N:M y Estructura Académica)
 NIVEL 3 (Horarios y Sesiones Lectivas)
  └── 10. Tramos Horarios y Sesiones (`tramos_horarios`, `tareas`, `horarios`, `horario_grupo`)
 
-4. Consultas SQL de Auditoría e Integridad
-4.1. Agrupación de Profesores por Departamento
+## 4. Consultas SQL de Auditoría e Integridad
+### 4.1. Agrupación de Profesores por Departamento
 SQL
 
 SELECT 
@@ -148,7 +141,7 @@ LEFT JOIN profesores p ON d.clave_penalara = p.departamento_id_externo
 GROUP BY d.id, d.nombre_completo
 ORDER BY d.nombre_completo;
 
-4.2. Agrupación de Materias por Departamento
+### 4.2. Agrupación de Materias por Departamento
 SQL
 
 SELECT 
@@ -160,7 +153,7 @@ LEFT JOIN materias m ON d.clave_penalara = m.departamento_id_externo
 GROUP BY d.id, d.nombre_completo
 ORDER BY total_materias DESC, d.nombre_completo ASC;
 
-4.3. Mapeo de Aulas en Conjuntos (Tabla Pivote aula_conjunto)
+### 4.3. Mapeo de Aulas en Conjuntos (Tabla Pivote aula_conjunto)
 SQL
 
 SELECT 
@@ -174,7 +167,7 @@ JOIN aulas a ON a.id = ac.aula_id
 GROUP BY ca.id, ca.nombre, ca.es_general
 ORDER BY ca.es_general DESC, ca.nombre ASC;
 
-4.4. Grupos por Curso (Relación 1:N)
+### 4.4. Grupos por Curso (Relación 1:N)
 SQL
 
 SELECT 
@@ -186,7 +179,7 @@ LEFT JOIN grupos g ON c.clave_penalara = g.curso_id_externo
 GROUP BY c.id, c.nombre_completo
 ORDER BY c.nombre_completo;
 
-4.5. Carga Lectiva y Materias por Curso (Tabla Pivote curso_materia)
+### 4.5. Carga Lectiva y Materias por Curso (Tabla Pivote curso_materia)
 SQL
 
 SELECT 
@@ -200,7 +193,7 @@ JOIN materias m ON m.id = cm.materia_id
 GROUP BY c.id, c.nombre_completo
 ORDER BY c.nombre_completo;
 
-4.6. Detección de Registros Huérfanos (Niveles 1 y 2)
+### 4.6. Detección de Registros Huérfanos (Niveles 1 y 2)
 SQL
 
 SELECT 'Profesor sin depto' AS tipo, id, nombre_completo, departamento_id_externo AS ref_externa
